@@ -162,61 +162,58 @@ def build_minutes_countdown(settings: Settings, cache_dir: Path) -> Tuple[AudioS
                 timeline.append({"label": text, "start": t_ms, "end": t_ms + len(spoken)})
                 t_ms += len(spoken)
 
-            if i == 1:
-                # After final minute
-                if settings.end_with:
-                    end_seg = prep(
-                        tts_cached(settings.end_with, cache_dir, tmpdir, settings.lang, settings.tld),
-                        settings.fade_ms
-                    )
-                    combined += end_seg
-                    timeline.append({
-                        "label": settings.end_with,
-                        "start": t_ms,
-                        "end": t_ms + len(end_seg)
-                    })
-                    t_ms += len(end_seg)
-                break
+            # Add beep after speaking (or at start of silent minute)
+            combined += beep
+            beep_label = f"beep_minute_{i}"
+            timeline.append({"label": beep_label, "start": t_ms, "end": t_ms + len(beep)})
+            t_ms += len(beep)
 
-            # Determine rest vs normal interval
-            if settings.every_n > 0 and (i % settings.every_n == 0):
+            # Calculate how much silence we need to make this a full 60-second minute
+            # Account for TTS duration and beep duration
+            elapsed_in_current_minute = len(beep)
+            if should_speak_minute(i, settings):
+                # We need to subtract the TTS duration we already added
+                # Go back and find the TTS segment we just added
+                for segment in reversed(timeline):
+                    if segment["label"].endswith(settings.minute_text):
+                        tts_duration = segment["end"] - segment["start"]
+                        elapsed_in_current_minute += tts_duration
+                        break
+
+            # Add rest cue if needed (this eats into the minute time)
+            # Only add rest if not the last minute
+            if i > 1 and settings.every_n > 0 and (i % settings.every_n == 0):
                 if skipped_rests < settings.skip_first_rest:
                     skipped_rests += 1
-                    # Normal interval
-                    combined += beep
-                    timeline.append({"label": "beep_skip_rest", "start": t_ms, "end": t_ms + len(beep)})
-                    t_ms += len(beep)
-
-                    # 1 minute of silence (or interval time)
-                    gap_ms = int(60000 if should_speak_minute(i, settings) else settings.interval * 1000)
-                    combined += AudioSegment.silent(duration=gap_ms)
-                    timeline.append({"label": "pause_skip_rest", "start": t_ms, "end": t_ms + gap_ms})
-                    t_ms += gap_ms
                 else:
-                    # Rest cue
+                    # Add rest prompt (this takes time from the minute)
                     if rest_seg:
                         combined += rest_seg
                         timeline.append({"label": settings.rest_text, "start": t_ms, "end": t_ms + len(rest_seg)})
                         t_ms += len(rest_seg)
+                        elapsed_in_current_minute += len(rest_seg)
 
-                    combined += beep
-                    timeline.append({"label": "beep", "start": t_ms, "end": t_ms + len(beep)})
-                    t_ms += len(beep)
+            # Fill the rest of the minute with silence
+            # Each minute should be exactly 60 seconds (60000 ms)
+            remaining_silence = 60000 - elapsed_in_current_minute
+            if remaining_silence > 0:
+                combined += AudioSegment.silent(duration=remaining_silence)
+                timeline.append({"label": f"silence_minute_{i}", "start": t_ms, "end": t_ms + remaining_silence})
+                t_ms += remaining_silence
 
-                    gap_ms = int(settings.long_interval * 1000)
-                    combined += AudioSegment.silent(duration=gap_ms)
-                    timeline.append({"label": "pause_long", "start": t_ms, "end": t_ms + gap_ms})
-                    t_ms += gap_ms
-            else:
-                # Normal interval - full minute of silence if spoken, else short interval
-                combined += beep
-                timeline.append({"label": "beep", "start": t_ms, "end": t_ms + len(beep)})
-                t_ms += len(beep)
-
-                gap_ms = int(60000 if should_speak_minute(i, settings) else settings.interval * 1000)
-                combined += AudioSegment.silent(duration=gap_ms)
-                timeline.append({"label": "pause", "start": t_ms, "end": t_ms + gap_ms})
-                t_ms += gap_ms
+            # After completing the last minute, add end message if specified
+            if i == 1 and settings.end_with:
+                end_seg = prep(
+                    tts_cached(settings.end_with, cache_dir, tmpdir, settings.lang, settings.tld),
+                    settings.fade_ms
+                )
+                combined += end_seg
+                timeline.append({
+                    "label": settings.end_with,
+                    "start": t_ms,
+                    "end": t_ms + len(end_seg)
+                })
+                t_ms += len(end_seg)
 
         return combined, timeline
 
