@@ -14,6 +14,7 @@ A powerful Python tool for generating customizable spoken countdown audio files 
 - **Spoken Countdown**: Text-to-speech using Google TTS with 40+ language support
 - **Customizable Intervals**: Configure timing between counts and rest periods
 - **Rest Prompts**: Automatic rest cues at configurable intervals (numbers mode only)
+  - Custom rest text: Use any phrase (e.g., "take a brief pause", "breathe and recover")
 - **Beep Sounds**: Adjustable frequency, duration, and volume
 - **Distinctive End Beep**: Longer, higher-pitched beep signals countdown completion
 - **TTS Caching**: Speeds up regeneration by caching voice files
@@ -92,7 +93,7 @@ python countdown_builder.py --mode minutes --start 30 --speak-at "30,15,10,5,1" 
 | `--minute-text` | (Minutes mode) Text to append to minute count | "minutes remaining" |
 | `--lead-in` | Opening phrase (e.g., "Get ready") | None |
 | `--end-with` | Closing phrase (e.g., "Good job!") | None |
-| `--rest-text` | Word spoken at rest cues | "rest" |
+| `--rest-text` | Text spoken at rest cues (can be phrases like "take a brief pause") | "rest" |
 | `--lang` | Language code (en, es, fr, de, etc.) | en |
 | `--tld` | Voice region (com, co.uk, com.au, etc.) | com |
 | `--outfile` | Output MP3 filename | countdown_combined.mp3 |
@@ -112,7 +113,13 @@ python countdown_builder.py --start 40 --outfile 40_reps.mp3
 
 **Spanish countdown with custom rest text:**
 ```bash
-python countdown_builder.py --start 30 --lang es --rest-text "descanso"
+python countdown_builder.py --start 30 --every-n 10 --lang es --rest-text "descanso"
+```
+
+**Custom rest phrases (longer text):**
+```bash
+python countdown_builder.py --start 40 --every-n 8 --rest-text "take a brief pause"
+python countdown_builder.py --start 50 --every-n 10 --rest-text "breathe and recover"
 ```
 
 **HIIT workout with lead-in and ending:**

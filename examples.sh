@@ -1,5 +1,7 @@
 #!/bin/bash
-# Example usage of countdown_builder.py with minutes mode
+# Example usage of countdown_builder.py
+
+## Minutes Mode Examples
 
 # Example 1: 30-minute timer speaking every 5 minutes
 python3 countdown_builder.py --mode minutes --start 30 --speak-interval 5 \
@@ -17,6 +19,25 @@ python3 countdown_builder.py --mode minutes --start 20 \
   --end-with "Great work! Take a break" \
   --outfile pomodoro.mp3
 
-# Example 4: Traditional rep countdown (numbers mode - default)
+## Numbers Mode Examples
+
+# Example 4: Traditional rep countdown with rest every 10
 python3 countdown_builder.py --start 50 --every-n 10 \
   --outfile 50_reps.mp3
+
+# Example 5: Custom rest text - short phrase
+python3 countdown_builder.py --start 40 --every-n 8 \
+  --rest-text "take a brief pause" \
+  --outfile 40_custom_rest.mp3
+
+# Example 6: Custom rest text - motivational
+python3 countdown_builder.py --start 100 --every-n 20 \
+  --rest-text "breathe and recover" \
+  --lead-in "Let's begin the workout" \
+  --end-with "Amazing job! You did it" \
+  --outfile 100_motivational.mp3
+
+# Example 7: Multi-language with custom rest
+python3 countdown_builder.py --start 30 --every-n 10 \
+  --lang es --rest-text "toma un descanso" \
+  --outfile 30_spanish_rest.mp3
