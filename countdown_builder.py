@@ -52,6 +52,12 @@ def prep(seg: AudioSegment, fade_ms: int = 12) -> AudioSegment:
 def make_beep(freq_hz: int, ms: int, gain_db: float) -> AudioSegment:
     return prep(Sine(freq_hz).to_audio_segment(duration=ms).apply_gain(gain_db))
 
+def make_end_beep(freq_hz: int, ms: int, gain_db: float) -> AudioSegment:
+    """Create a distinctive end beep - longer duration and slightly higher pitch."""
+    end_freq = int(freq_hz * 1.5)  # 50% higher frequency
+    end_duration = ms * 3  # 3x longer
+    return prep(Sine(end_freq).to_audio_segment(duration=end_duration).apply_gain(gain_db))
+
 def tts_to_file(text: str, path: Path, lang: str = "en", tld: str = "com") -> None:
     gTTS(text=text, lang=lang, tld=tld).save(str(path))
 
@@ -129,6 +135,7 @@ def build_minutes_countdown(settings: Settings, cache_dir: Path) -> Tuple[AudioS
         # Precompute assets
         # Note: Rest prompts are disabled in minutes mode
         beep = make_beep(settings.beep_freq, settings.beep_ms, settings.beep_gain)
+        end_beep = make_end_beep(settings.beep_freq, settings.beep_ms, settings.beep_gain)
 
         timeline = []
         t_ms = 0
@@ -188,19 +195,30 @@ def build_minutes_countdown(settings: Settings, cache_dir: Path) -> Tuple[AudioS
                 timeline.append({"label": f"silence_minute_{i}", "start": t_ms, "end": t_ms + remaining_silence})
                 t_ms += remaining_silence
 
-            # After completing the last minute, add end message if specified
-            if i == 1 and settings.end_with:
-                end_seg = prep(
-                    tts_cached(settings.end_with, cache_dir, tmpdir, settings.lang, settings.tld),
-                    settings.fade_ms
-                )
-                combined += end_seg
+            # After completing the last minute, add distinctive end beep and message
+            if i == 1:
+                # Add distinctive end beep
+                combined += end_beep
                 timeline.append({
-                    "label": settings.end_with,
+                    "label": "end_beep",
                     "start": t_ms,
-                    "end": t_ms + len(end_seg)
+                    "end": t_ms + len(end_beep)
                 })
-                t_ms += len(end_seg)
+                t_ms += len(end_beep)
+
+                # Add end message if specified
+                if settings.end_with:
+                    end_seg = prep(
+                        tts_cached(settings.end_with, cache_dir, tmpdir, settings.lang, settings.tld),
+                        settings.fade_ms
+                    )
+                    combined += end_seg
+                    timeline.append({
+                        "label": settings.end_with,
+                        "start": t_ms,
+                        "end": t_ms + len(end_seg)
+                    })
+                    t_ms += len(end_seg)
 
         return combined, timeline
 
@@ -213,6 +231,7 @@ def build_countdown_audio(settings: Settings, cache_dir: Path) -> Tuple[AudioSeg
         # Precompute assets
         rest_seg = prep(tts_cached(settings.rest_text, cache_dir, tmpdir, settings.lang, settings.tld), settings.fade_ms)
         beep = make_beep(settings.beep_freq, settings.beep_ms, settings.beep_gain)
+        end_beep = make_end_beep(settings.beep_freq, settings.beep_ms, settings.beep_gain)
 
         timeline = []
         t_ms = 0
@@ -239,7 +258,16 @@ def build_countdown_audio(settings: Settings, cache_dir: Path) -> Tuple[AudioSeg
             t_ms += len(spoken)
 
             if i == 1:
-                # After final "1"
+                # After final "1" - add distinctive end beep
+                combined += end_beep
+                timeline.append({
+                    "label": "end_beep",
+                    "start": t_ms,
+                    "end": t_ms + len(end_beep)
+                })
+                t_ms += len(end_beep)
+
+                # Add end message if specified
                 if settings.end_with:
                     end_seg = prep(
                         tts_cached(settings.end_with, cache_dir, tmpdir, settings.lang, settings.tld),
