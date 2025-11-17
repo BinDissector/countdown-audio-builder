@@ -13,8 +13,9 @@ A powerful Python tool for generating customizable spoken countdown audio files 
   - Full customization of spoken text
 - **Spoken Countdown**: Text-to-speech using Google TTS with 40+ language support
 - **Customizable Intervals**: Configure timing between counts and rest periods
-- **Rest Prompts**: Automatic rest cues at configurable intervals
+- **Rest Prompts**: Automatic rest cues at configurable intervals (numbers mode only)
 - **Beep Sounds**: Adjustable frequency, duration, and volume
+- **Distinctive End Beep**: Longer, higher-pitched beep signals countdown completion
 - **TTS Caching**: Speeds up regeneration by caching voice files
 - **Timeline Export**: JSON timeline for editing in external tools
 - **Multiple Interfaces**: Command-line, GUI, and web-based interfaces
