@@ -1,9 +1,11 @@
 # Countdown Audio Builder Project
 
-This project contains a Python script for generating spoken countdown audio files with beeps and rest prompts.
+This project contains Python scripts for generating spoken countdown audio files with beeps and rest prompts.
 
-## Main File
-- `countdown_builder.py`: The main Python script for building countdown audio
+## Main Files
+- `countdown_builder.py`: The main CLI script for building countdown audio
+- `countdown_gui.py`: GUI interface for easy configuration and generation
+- `countdown_web.py`: Web-based interface accessible via browser
 
 ## Dependencies
 The script requires:
@@ -11,38 +13,62 @@ The script requires:
 - `pydub` (Audio manipulation)
 - `ffmpeg` (Required by pydub for audio processing)
 
+## Modes
+
+### Numbers Mode (default)
+Counts down repetitions: "40... 39... 38..."
+Perfect for: Fitness, reps, exercise routines
+
+### Minutes Mode (NEW)
+Time-based countdown: "30 minutes remaining... 25 minutes remaining..."
+Perfect for: Timers, Pomodoro, cooking, meditation, meetings
+
 ## Usage
-Run the script with various options to customize your countdown audio. See the script's help for all available options:
+
+### CLI
 ```bash
-python countdown_builder.py --help
+# Numbers mode (reps)
+python countdown_builder.py --start 40 --outfile 40_reps.mp3
+
+# Minutes mode with specific speaking times
+python countdown_builder.py --mode minutes --start 30 --speak-at "30,15,10,5,1" --outfile timer.mp3
+
+# Minutes mode speaking every 5 minutes
+python countdown_builder.py --mode minutes --start 60 --speak-interval 5 --outfile 60min.mp3
 ```
 
-## Files
-- `countdown_builder.py`: The main Python script for building countdown audio
-- `countdown_gui.py`: GUI interface for easy configuration and generation
+See `examples.sh` for more usage patterns.
 
-## Features
-- Spoken countdown with configurable start number
-- Beeps between numbers
-- Rest prompts at configurable intervals
-- Caching for TTS to speed up repeated runs
-- Timeline JSON output for editing
-- MP3 output with configurable bitrate
-- **NEW**: Easy-to-use GUI with organized tabs for settings
-- **NEW**: Progress tracking during generation
-- **NEW**: Audio preview functionality
-- **NEW**: Save/load presets for different workout types
-
-## GUI Usage
+### GUI
 Run the GUI with:
 ```bash
 python countdown_gui.py
 ```
 
-The GUI provides:
-- **Basic Settings**: Core countdown parameters
-- **Advanced Settings**: Text and language options  
-- **Audio Settings**: Beep and audio processing controls
-- **Generate Button**: Creates the countdown with progress tracking
-- **Preview Button**: Plays the generated audio file
-- **Preset Management**: Save and load configuration presets
+### Web Interface
+Run the web interface with:
+```bash
+python countdown_web.py
+```
+Then open http://localhost:8001 in your browser.
+
+## Key Features
+- **Dual modes**: Numbers (reps) or Minutes (time-based)
+- **Flexible speaking**: Every N minutes, or specific minutes only
+- **Multi-language**: 40+ languages via Google TTS
+- **Rest prompts**: Automatic rest cues at intervals
+- **Customizable audio**: Beep frequency, duration, volume
+- **TTS caching**: Fast regeneration
+- **Timeline export**: JSON with precise timestamps
+- **Multiple interfaces**: CLI, GUI, web
+- **Preset management**: Save/load configurations
+
+## Files
+- `countdown_builder.py`: Main CLI script
+- `countdown_gui.py`: GUI interface (tkinter)
+- `countdown_web.py`: Web interface (built-in server)
+- `examples.sh`: Example usage patterns
+- `README.md`: Comprehensive documentation
+- `CHANGELOG.md`: Version history and changes
+- `requirements.txt`: Python dependencies
+- `LICENSE`: MIT License

@@ -1,10 +1,17 @@
 # Countdown Audio Builder
 
-A powerful Python tool for generating customizable spoken countdown audio files with beeps and rest prompts. Perfect for workout routines, interval training, timed exercises, or any activity requiring spoken time tracking.
+A powerful Python tool for generating customizable spoken countdown audio files with beeps and rest prompts. Perfect for workout routines, interval training, timed exercises, timers, or any activity requiring spoken time tracking.
 
 ## Features
 
-- **Spoken Countdown**: Text-to-speech countdown using Google TTS with multiple language support
+- **Dual Modes**:
+  - **Numbers Mode**: Count down reps (e.g., "40, 39, 38...")
+  - **Minutes Mode**: Time-based countdown (e.g., "30 minutes remaining")
+- **Flexible Speaking Options**:
+  - Speak at specific intervals (e.g., every 5 minutes)
+  - Speak only at specific times (e.g., 30, 15, 10, 5, 1)
+  - Full customization of spoken text
+- **Spoken Countdown**: Text-to-speech using Google TTS with 40+ language support
 - **Customizable Intervals**: Configure timing between counts and rest periods
 - **Rest Prompts**: Automatic rest cues at configurable intervals
 - **Beep Sounds**: Adjustable frequency, duration, and volume
@@ -53,19 +60,29 @@ pip install gtts pydub
 
 The most flexible way to generate countdown audio:
 
+**Numbers Mode (default):**
 ```bash
-python countdown_builder.py --start 40 --interval 3.5 --long-interval 8 --every-n 8
+python countdown_builder.py --start 40 --interval 3.5 --outfile 40_reps.mp3
+```
+
+**Minutes Mode:**
+```bash
+python countdown_builder.py --mode minutes --start 30 --speak-at "30,15,10,5,1" --outfile 30min_timer.mp3
 ```
 
 #### Common Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--start` | Starting number for countdown | 80 |
+| `--mode` | Countdown mode: "numbers" or "minutes" | numbers |
+| `--start` | Starting number (reps or minutes) | 80 |
 | `--interval` | Seconds between normal cues | 3.5 |
 | `--long-interval` | Seconds after rest cues | 8.0 |
 | `--every-n` | Insert rest every N counts (0 to disable) | 8 |
 | `--skip-first-rest` | Skip first N rest periods | 0 |
+| `--speak-interval` | (Minutes mode) Speak every N minutes (0 = all) | 0 |
+| `--speak-at` | (Minutes mode) Speak at specific minutes (e.g., "30,15,10,5,1") | None |
+| `--minute-text` | (Minutes mode) Text to append to minute count | "minutes remaining" |
 | `--lead-in` | Opening phrase (e.g., "Get ready") | None |
 | `--end-with` | Closing phrase (e.g., "Good job!") | None |
 | `--rest-text` | Word spoken at rest cues | "rest" |
@@ -78,6 +95,8 @@ python countdown_builder.py --start 40 --interval 3.5 --long-interval 8 --every-
 | `--beep-gain` | Beep volume in dB (negative = quieter) | -6.0 |
 
 #### Examples
+
+**Numbers Mode Examples:**
 
 **Basic 40-rep countdown:**
 ```bash
@@ -97,6 +116,36 @@ python countdown_builder.py --start 60 --every-n 10 --lead-in "Get ready to begi
 **Skip warmup rests:**
 ```bash
 python countdown_builder.py --start 50 --every-n 10 --skip-first-rest 2
+```
+
+**Minutes Mode Examples:**
+
+**30-minute timer speaking every 5 minutes:**
+```bash
+python countdown_builder.py --mode minutes --start 30 --speak-interval 5 --outfile 30min_timer.mp3
+```
+
+**60-minute timer speaking at specific times:**
+```bash
+python countdown_builder.py --mode minutes --start 60 --speak-at "60,45,30,15,10,5,1" --outfile 60min_custom.mp3
+```
+
+**25-minute Pomodoro timer:**
+```bash
+python countdown_builder.py --mode minutes --start 25 --speak-at "25,10,5,1" \
+  --lead-in "Focus time begins now" --end-with "Time for a break" --outfile pomodoro.mp3
+```
+
+**Custom minute text (e.g., in Spanish):**
+```bash
+python countdown_builder.py --mode minutes --start 20 --speak-interval 5 \
+  --lang es --minute-text "minutos restantes" --outfile 20min_spanish.mp3
+```
+
+**Silent timer (beeps only at specific minutes):**
+```bash
+python countdown_builder.py --mode minutes --start 15 --speak-at "15,1" \
+  --beep-freq 800 --beep-ms 500 --outfile silent_timer.mp3
 ```
 
 ### Graphical User Interface
@@ -162,13 +211,20 @@ Times are in milliseconds. Use this for:
 
 ## Use Cases
 
+### Numbers Mode (Rep Counting)
 - **Fitness Training**: HIIT workouts, rep counting, timed exercises
 - **Physical Therapy**: Structured exercise routines with rest periods
 - **Sports Coaching**: Drill timing, interval training
-- **Presentations**: Speaker countdowns
-- **Cooking**: Timed recipe steps
-- **Educational**: Classroom timers, test countdowns
-- **Productivity**: Pomodoro technique, work intervals
+
+### Minutes Mode (Time-Based)
+- **Productivity**: Pomodoro technique (25-minute work blocks), focus timers
+- **Cooking**: Long-duration recipes, slow cooking, proofing timers
+- **Educational**: Test duration, exam timers, study sessions
+- **Presentations**: Speaker time limits, presentation countdowns
+- **Meditation**: Guided meditation sessions with interval bells
+- **Parking Meters**: Remind you when time is running out
+- **Household Tasks**: Laundry timers, cleaning routines
+- **Meetings**: Keep meetings on track with time reminders
 
 ## Advanced Features
 
