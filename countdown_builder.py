@@ -127,12 +127,11 @@ def build_minutes_countdown(settings: Settings, cache_dir: Path) -> Tuple[AudioS
         tmpdir = Path(td)
 
         # Precompute assets
-        rest_seg = prep(tts_cached(settings.rest_text, cache_dir, tmpdir, settings.lang, settings.tld), settings.fade_ms) if settings.every_n > 0 else None
+        # Note: Rest prompts are disabled in minutes mode
         beep = make_beep(settings.beep_freq, settings.beep_ms, settings.beep_gain)
 
         timeline = []
         t_ms = 0
-        skipped_rests = 0
 
         combined = AudioSegment.silent(duration=0, frame_rate=TARGET_RATE)
 
@@ -180,20 +179,8 @@ def build_minutes_countdown(settings: Settings, cache_dir: Path) -> Tuple[AudioS
                         elapsed_in_current_minute += tts_duration
                         break
 
-            # Add rest cue if needed (this eats into the minute time)
-            # Only add rest if not the last minute
-            if i > 1 and settings.every_n > 0 and (i % settings.every_n == 0):
-                if skipped_rests < settings.skip_first_rest:
-                    skipped_rests += 1
-                else:
-                    # Add rest prompt (this takes time from the minute)
-                    if rest_seg:
-                        combined += rest_seg
-                        timeline.append({"label": settings.rest_text, "start": t_ms, "end": t_ms + len(rest_seg)})
-                        t_ms += len(rest_seg)
-                        elapsed_in_current_minute += len(rest_seg)
-
             # Fill the rest of the minute with silence
+            # Note: Rest prompts are not used in minutes mode
             # Each minute should be exactly 60 seconds (60000 ms)
             remaining_silence = 60000 - elapsed_in_current_minute
             if remaining_silence > 0:
