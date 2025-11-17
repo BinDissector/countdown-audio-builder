@@ -28,23 +28,27 @@ A powerful Python tool for generating customizable spoken countdown audio files 
 
 - Python 3.7 or higher
 - ffmpeg (required for audio processing)
+- python3-tk (required for GUI interface)
 
-#### Installing ffmpeg
+#### Installing Dependencies
 
-**Ubuntu/Debian:**
+**Ubuntu/Debian/Pop!_OS:**
 ```bash
-sudo apt install ffmpeg
+sudo apt update
+sudo apt install -y ffmpeg python3-tk
 ```
 
 **macOS (with Homebrew):**
 ```bash
 brew install ffmpeg
+# tkinter is included with Python on macOS
 ```
 
 **Windows:**
-Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH.
+- Download ffmpeg from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
+- tkinter is included with Python on Windows
 
-### Install Dependencies
+### Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -54,6 +58,8 @@ Or install manually:
 ```bash
 pip install gtts pydub
 ```
+
+**Note:** The GUI requires `python3-tk` which must be installed via your system package manager (see above).
 
 ## Usage
 
@@ -252,9 +258,28 @@ python countdown_builder.py --lang en --tld com.au  # Australian English
 
 ## Troubleshooting
 
+### "No module named 'tkinter'" Error
+
+**Linux/Ubuntu/Pop!_OS:**
+```bash
+sudo apt update
+sudo apt install -y python3-tk
+```
+
+**macOS/Windows:** tkinter is included with Python, no action needed.
+
 ### "pydub/ffmpeg not ready" Error
 
-Make sure ffmpeg is installed and accessible in your PATH.
+Make sure ffmpeg is installed and accessible in your PATH:
+```bash
+# Test if ffmpeg is installed
+ffmpeg -version
+```
+
+If not found, install it:
+- **Ubuntu/Debian:** `sudo apt install ffmpeg`
+- **macOS:** `brew install ffmpeg`
+- **Windows:** Download from [ffmpeg.org](https://ffmpeg.org/download.html)
 
 ### TTS Failures
 
